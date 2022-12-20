@@ -3,21 +3,29 @@ package com.example.jsondata
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.util.Log.d
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 
 const val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
 class MainActivity : AppCompatActivity() {
-
-    lateinit var txtId:TextView
+        lateinit var myAdapter: MyAdapter
+        lateinit var linearLayoutManager: LinearLayoutManager
+        lateinit var recyclerview_users:RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        txtId=findViewById(R.id.txtId)
+        recyclerview_users=findViewById(R.id.recyclerview_users)
+
+        recyclerview_users.setHasFixedSize(true)
+        linearLayoutManager = LinearLayoutManager(this)
+        recyclerview_users.layoutManager = linearLayoutManager
 
 
         getData()
@@ -39,21 +47,15 @@ class MainActivity : AppCompatActivity() {
             ) {
                 val responseBody = response.body()!!
 
-                val myStringBuilder = StringBuilder()
-
-                for (myData in responseBody) {
-                    myStringBuilder.append(myData.id)
-                    myStringBuilder.append("\n")
-                }
-
-                txtId.text = myStringBuilder
-
+            myAdapter = MyAdapter(baseContext,responseBody)
+            myAdapter.notifyDataSetChanged()
+            recyclerview_users.adapter = myAdapter
 
             }
 
             override fun onFailure(call: Call<List<MyDataItem>?>, t: Throwable) {
 
-                Log.d("MainActivity","onFailure: "+t.message)
+                d("MainActivity","onFailure: "+t.message)
 
             }
         })
